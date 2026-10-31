@@ -29,7 +29,7 @@ const cartItems = [
 ];
 
 /*
-Previous cart list, kept here as a comment for reference:
+
 
 const cartItems = [
   { name: "Apples", price: 180, quantity: 2, unit: "kg", image: products[0].image },
