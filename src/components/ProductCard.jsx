@@ -1,29 +1,16 @@
-
-
-
-function ProductCard({ name, price, image, category }) {
+﻿function ProductCard({ name, price, image, unit }) {
   return (
-
-    
-    <div className="product-card">
-
-
-   <img src={image} alt={name} />
-
-      <div className="product-info">
-
-        <p className="category">{category}</p>
-
-        <h3>{name}</h3>
-
-        <h4>₹{price}</h4>
-
-        <button className="add-btn">
-          Add to Cart
-        </button>
-
+    <article className="product-card">
+      <div className="product-image-wrap">
+        <img className="product-image" src={image} alt={name} />
       </div>
-    </div>
+      <div className="product-info">
+        <h3>{name}</h3>
+        <p className="product-unit">{unit}</p>
+        <p className="product-price">₹{price}</p>
+        <button className="add-btn" type="button">Add to Cart</button>
+      </div>
+    </article>
   );
 }
 

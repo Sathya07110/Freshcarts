@@ -1,27 +1,24 @@
+﻿function CartItem({ name, price, quantity, unit, image }) {
+  const itemTotal = price * quantity;
 
-
-function CartItem({ name, price, quantity, image }) {
   return (
-    <div className="cart-item">
-      <img src={image} alt={name} className="cart-image" />
+    <article className="cart-item">
+      <img src={image} alt="" className="cart-item-image" />
 
-      <div className="cart-details">
-        <h4>{name}</h4>
-        <p>₹{price} / kg</p>
+      <div className="cart-item-details">
+        <h3>{name}</h3>
+        <p>₹{price} / {unit}</p>
       </div>
 
-      <div className="quantity-controls">
-        <button>-</button>
+      <div className="quantity-controls" aria-label={`Quantity: ${quantity}`}>
+        <button type="button" aria-label="Decrease quantity">−</button>
         <span>{quantity}</span>
-        <button>+</button>
+        <button type="button" aria-label="Increase quantity">+</button>
       </div>
 
-      <strong className="item-total">
-        ₹{price * quantity}
-      </strong>
-
-      <span className="remove">×</span>
-    </div>
+      <strong className="cart-price">₹{itemTotal}</strong>
+      <button className="remove-btn" type="button" aria-label={`Remove ${name}`}>×</button>
+    </article>
   );
 }
 

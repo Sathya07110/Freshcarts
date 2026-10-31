@@ -1,13 +1,12 @@
-
-
-function Header() {
+﻿function Header({ itemCount }) {
   return (
     <header className="header">
-        
-        <h2 className="logo">FreshCarts</h2>
-
-      <div className="cart-badge">
-        🛒 <span>3</span>
+      <a className="logo" href="#products" aria-label="FreshCart home">
+        Fresh<span>Cart</span>
+      </a>
+      <div className="cart-badge" aria-label={`${itemCount} items in cart`}>
+        <span className="cart-icon" aria-hidden="true">🛒</span>
+        <span className="badge-count">{itemCount}</span>
       </div>
     </header>
   );
