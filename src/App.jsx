@@ -1,52 +1,105 @@
-import Header from "./components/Header.jsx";
-import ProductCard from "./components/ProductCard.jsx";
-import CartItem from "./components/CartItem.jsx";
-import CartSummary from "./components/CartSummary.jsx";
-import productData from "./data/products.json";
+import { useState } from "react";
+
+import Header from "./components/Header";
+import ProductCard from "./components/ProductCard";
+import CartItem from "./components/CartItem";
+import CartSummary from "./components/CartSummary";
+
+import products from "./data.js";
+
 import "./App.css";
 
-// Product data now comes from products.json.
-const products = productData;
-
-/*
-Previous product list, kept here as a comment for reference:
-
-const products = [
-  { name: "Apples", price: 180, unit: "1 kg", image: productData[0].image },
-  { name: "Bananas", price: 60, unit: "1 dozen", image: productData[1].image },
-  { name: "Carrots", price: 40, unit: "500 g", image: productData[2].image },
-  { name: "Tomatoes", price: 35, unit: "1 kg", image: productData[3].image },
-  { name: "Milk", price: 56, unit: "1 litre", image: productData[4].image },
-  { name: "Bread", price: 45, unit: "400 g", image: productData[5].image },
-];
-*/
-
-// Keep the same sample cart: 2 apples, 2 milk, and 1 bread.
-const cartItems = [
-  { product: products[0], quantity: 2, unit: "kg" },
-  { product: products[4], quantity: 2, unit: "litre" },
-  { product: products[5], quantity: 1, unit: "each" },
-];
-
-/*
-
-
-const cartItems = [
-  { name: "Apples", price: 180, quantity: 2, unit: "kg", image: products[0].image },
-  { name: "Milk", price: 56, quantity: 2, unit: "litre", image: products[4].image },
-  { name: "Bread", price: 45, quantity: 1, unit: "each", image: products[5].image },
-];
-*/
-
 function App() {
+  //Cart state
+  const [cartItems, setCartItems] = useState([
+    { productId: 1, quantity: 1 },
+    { productId: 3, quantity: 1 },
+    { productId: 6, quantity: 1 },
+  ]);
+  // const [cartItems, setCartItems] = useState([]);
+
+  // Add product to cart
+  function handleAddToCart(productId) {
+    const existingItem = cartItems.find(
+      (item) => item.productId === productId
+    );
+
+    if (existingItem) {
+      setCartItems(
+        cartItems.map((item) =>
+          item.productId === productId
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      );
+    } else {
+      setCartItems([
+        ...cartItems,
+        { productId: productId, quantity: 1 },
+      ]);
+    }
+  }
+
+  // Increase or decrease quantity
+  function handleQuantityChange(productId, change) {
+    setCartItems(
+      cartItems
+        .map((item) =>
+          item.productId === productId
+            ? { ...item, quantity: item.quantity + change }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  }
+
+  // Remove product
+  function handleDelete(productId) {
+    setCartItems(
+      cartItems.filter((item) => item.productId !== productId)
+    );
+  }
+
+  // Get product details for cart
+  const cartWithProducts = cartItems.map((item) => ({
+    ...item,
+    product: products.find(
+      (product) => product.id === item.productId
+    ),
+  }));
+
+  // Total quantity
+  const itemCount = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
+
+  // Subtotal
+  const subtotal = cartWithProducts.reduce(
+    (total, item) =>
+      total + item.product.price * item.quantity,
+    0
+  );
+
+  // Discount
+  const discount = subtotal > 0 ? 100 : 0;
+
+  // Grand total
+  const grandTotal = subtotal - discount;
+
   return (
     <>
-      <Header itemCount={5} />
+      <Header itemCount={itemCount} />
 
       <main className="container">
-        <section className="products-section">
+
+        {/* Products Section */}
+        <section className="products-section" id="products">
+
           <h1>Fresh picks</h1>
+
           <div className="product-grid">
+
             {products.map((product) => (
               <ProductCard
                 key={product.id}
@@ -54,27 +107,66 @@ function App() {
                 price={product.price}
                 unit={product.unit}
                 image={product.image}
+                onAddToCart={() =>
+                  handleAddToCart(product.id)
+                }
               />
             ))}
+
           </div>
         </section>
 
+        {/* Cart Section */}
         <aside className="cart-section">
-          <h2>Your cart (3 items)</h2>
-          <div className="cart-items">
-            {cartItems.map((item) => (
-              <CartItem
-                key={item.product.id}
-                name={item.product.name}
-                price={item.product.price}
-                quantity={item.quantity}
-                unit={item.unit}
-                image={item.product.image}
-              />
-            ))}
-          </div>
-          <CartSummary />
+
+          <h2>Your cart ({itemCount} items)</h2>
+
+          {cartWithProducts.length === 0 ? (
+            <p className="empty-cart">
+              Your cart is empty
+            </p>
+          ) : (
+            <div className="cart-items">
+
+              {cartWithProducts.map((item) => (
+                <CartItem
+                  key={item.product.id}
+                  name={item.product.name}
+                  price={item.product.price}
+                  quantity={item.quantity}
+                  unit={item.product.unit}
+                  image={item.product.image}
+                  onIncrease={() =>
+                    handleQuantityChange(
+                      item.product.id,
+                      1
+                    )
+                  }
+                  onDecrease={() =>
+                    handleQuantityChange(
+                      item.product.id,
+                      -1
+                    )
+                  }
+                  onDelete={() =>
+                    handleDelete(item.product.id)
+                  }
+                />
+              ))}
+
+            </div>
+          )}
+
+          {/* Cart Summary */}
+          <CartSummary
+            subtotal={subtotal}
+            discount={discount}
+            grandTotal={grandTotal}
+            isCartEmpty={cartItems.length === 0}
+          />
+
         </aside>
+
       </main>
     </>
   );
