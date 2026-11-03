@@ -1,5 +1,12 @@
-﻿function CartItem({ name, price, quantity, unit, image,onIncrease,onDecrease,onDelete }) {
-  const itemTotal = price * quantity;
+﻿function CartItem({ name,
+price,
+quantity, 
+unit,
+image,
+onIncrease,
+onDecrease,
+onDelete }) {
+const itemTotal = price * quantity;
 
   return (
     <article className="cart-item">
@@ -11,18 +18,25 @@
       </div>
 
       <div className="quantity-controls" 
-      aria-label={`Quantity: ${quantity}`}>
-        <button type="button" 
+      aria-label={`Quantity: ${quantity}`}
+      >
+        <button
+         type="button" 
         onClick={onDecrease} 
         aria-label="Decrease quantity">−</button>
         <span>{quantity}</span>
         <button type="button" 
-        onClick={onIncrease} aria-label="Increase quantity">+</button>
+        onClick={onIncrease}
+         aria-label="Increase quantity">+</button>
       </div>
 
-      <strong className="cart-price">₹{itemTotal}</strong>
-      <button className="remove-btn" type="button"
-       onClick={onDelete} aria-label={`Remove ${name}`}>×</button>
+      <strong className="cart-price">
+        ₹{itemTotal.toFixed(2)}
+       </strong>
+      <button className="remove-btn" 
+      type="button"
+     onClick={onDelete} 
+     aria-label={`Remove ${name}`}>×</button>
     </article>
   );
 }

@@ -22,12 +22,13 @@
 
       <div className="summary-row discount">
         <span>Discount</span>
-        <span className="discount-amount">-₹{discount}</span>
+        <span className="discount-amount">
+          -₹{discount.toFixed(2)}</span>
       </div>
 
       <div className="summary-row grand-total">
         <span>Grand total</span>
-        <span>₹{grandTotal}</span>
+        <span>₹{grandTotal.toFixed(2)}</span>
       </div>
 
       <button

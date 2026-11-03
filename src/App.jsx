@@ -1,52 +1,91 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 
 import Header from "./components/Header";
 import ProductCard from "./components/ProductCard";
 import CartItem from "./components/CartItem";
 import CartSummary from "./components/CartSummary";
 
-import products from "./data.js";
+import { getProducts, getGroceries } from "./api";
 
 import "./App.css";
 
 function App() {
-  //Cart state
-  const [cartItems, setCartItems] = useState([
-    { productId: 1, quantity: 1 },
-    { productId: 3, quantity: 1 },
-    { productId: 6, quantity: 1 },
-  ]);
-  // const [cartItems, setCartItems] = useState([]);
+  const [products, setProducts] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+
+  const [error, setError] = useState("");
+
+  const [category, setCategory] = useState("all");
+
+  const [retryCount, setRetryCount] = useState(0);
+
+  const [cartItems, setCartItems] = useState([]);
+
+  // Fetch products from API
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        setLoading(true);
+        setError("");
+
+        let fetchedProducts;
+
+        if (category === "groceries") {
+          fetchedProducts = await getGroceries();
+        } else {
+          fetchedProducts = await getProducts();
+        }
+
+        setProducts(fetchedProducts);
+      } catch (err) {
+        setError(err.message);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProducts();
+  }, [category, retryCount]);
 
   // Add product to cart
-  function handleAddToCart(productId) {
-    const existingItem = cartItems.find(
-      (item) => item.productId === productId
-    );
+  function handleAddToCart(product) {
+    setCartItems((previousItems) => {
+      const existingItem = previousItems.find(
+        (item) => item.productId === product.id
+      );
 
-    if (existingItem) {
-      setCartItems(
-        cartItems.map((item) =>
-          item.productId === productId
+      if (existingItem) {
+        return previousItems.map((item) =>
+          item.productId === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
-        )
-      );
-    } else {
-      setCartItems([
-        ...cartItems,
-        { productId: productId, quantity: 1 },
-      ]);
-    }
+        );
+      }
+
+      return [
+        ...previousItems,
+        {
+          productId: product.id,
+          quantity: 1,
+          product,
+        },
+      ];
+    });
   }
 
-  // Increase or decrease quantity
+  // Increase and decrease quantity
   function handleQuantityChange(productId, change) {
-    setCartItems(
-      cartItems
+    setCartItems((previousItems) =>
+      previousItems
         .map((item) =>
           item.productId === productId
-            ? { ...item, quantity: item.quantity + change }
+            ? {
+                ...item,
+                quantity: item.quantity + change,
+              }
             : item
         )
         .filter((item) => item.quantity > 0)
@@ -55,37 +94,32 @@ function App() {
 
   // Remove product
   function handleDelete(productId) {
-    setCartItems(
-      cartItems.filter((item) => item.productId !== productId)
+    setCartItems((previousItems) =>
+      previousItems.filter(
+        (item) => item.productId !== productId
+      )
     );
   }
+  
+  // Total cart quantity
+const itemCount = cartItems.reduce(
+  (total, item) => total + item.quantity,
+  0
+);
 
-  // Get product details for cart
-  const cartWithProducts = cartItems.map((item) => ({
-    ...item,
-    product: products.find(
-      (product) => product.id === item.productId
-    ),
-  }));
+// Calculate subtotal
+const subtotal = cartItems.reduce(
+  (total, item) =>
+    total + item.product.price * item.quantity,
+  0
+);
 
-  // Total quantity
-  const itemCount = cartItems.reduce(
-    (total, item) => total + item.quantity,
-    0
-  );
+// Discount
+const discount = subtotal >= 100 ? 100 : 0;
 
-  // Subtotal
-  const subtotal = cartWithProducts.reduce(
-    (total, item) =>
-      total + item.product.price * item.quantity,
-    0
-  );
+// Grand total
+const grandTotal = subtotal - discount;
 
-  // Discount
-  const discount = subtotal > 0 ? 100 : 0;
-
-  // Grand total
-  const grandTotal = subtotal - discount;
 
   return (
     <>
@@ -98,58 +132,64 @@ function App() {
 
           <h1>Fresh picks</h1>
 
-          <div className="product-grid">
+          <div className="category-filter">
+            <label htmlFor="category">
+              Choose category:
+            </label>
 
-            {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                name={product.name}
-                price={product.price}
-                unit={product.unit}
-                image={product.image}
-                onAddToCart={() =>
-                  handleAddToCart(product.id)
-                }
-              />
-            ))}
-
+            <select
+              id="category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              <option value="all">All Products</option>
+              <option value="groceries">Groceries</option>
+            </select>
           </div>
-        </section>
 
-        {/* Cart Section */}
-        <aside className="cart-section">
-
-          <h2>Your cart ({itemCount} items)</h2>
-
-          {cartWithProducts.length === 0 ? (
-            <p className="empty-cart">
-              Your cart is empty
+          {/* Loading State */}
+          {loading && (
+            <p className="loading-message">
+              Loading products...
             </p>
-          ) : (
-            <div className="cart-items">
+          )}
 
-              {cartWithProducts.map((item) => (
-                <CartItem
-                  key={item.product.id}
-                  name={item.product.name}
-                  price={item.product.price}
-                  quantity={item.quantity}
-                  unit={item.product.unit}
-                  image={item.product.image}
-                  onIncrease={() =>
-                    handleQuantityChange(
-                      item.product.id,
-                      1
-                    )
-                  }
-                  onDecrease={() =>
-                    handleQuantityChange(
-                      item.product.id,
-                      -1
-                    )
-                  }
-                  onDelete={() =>
-                    handleDelete(item.product.id)
+          {/* Error State */}
+          {!loading && error && (
+            <div className="error-message">
+              <p>{error}</p>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setRetryCount((count) => count + 1)
+                }
+              >
+                Try Again
+              </button>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && !error && products.length === 0 && (
+            <p className="empty-products">
+              No products found.
+            </p>
+          )}
+
+          {/* Product Cards */}
+          {!loading && !error && products.length > 0 && (
+            <div className="product-grid">
+
+              {products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  name={product.title}
+                  price={product.price}
+                  unit={product.category}
+                  image={product.thumbnail}
+                  onAddToCart={() =>
+                    handleAddToCart(product)
                   }
                 />
               ))}
@@ -157,7 +197,43 @@ function App() {
             </div>
           )}
 
-          {/* Cart Summary */}
+        </section>
+
+        {/* Cart Section */}
+        <aside className="cart-section">
+
+          <h2>Your cart ({itemCount} items)</h2>
+
+          {cartItems.length === 0 ? (
+            <p className="empty-cart">
+              Your cart is empty
+            </p>
+          ) : (
+            <div className="cart-items">
+
+              {cartItems.map((item) => (
+                <CartItem
+                  key={item.productId}
+                  name={item.product.title}
+                  price={item.product.price}
+                  quantity={item.quantity}
+                  unit={item.product.category}
+                  image={item.product.thumbnail}
+                  onIncrease={() =>
+                    handleQuantityChange(item.productId, 1)
+                  }
+                  onDecrease={() =>
+                    handleQuantityChange(item.productId, -1)
+                  }
+                  onDelete={() =>
+                    handleDelete(item.productId)
+                  }
+                />
+              ))}
+
+            </div>
+          )}
+
           <CartSummary
             subtotal={subtotal}
             discount={discount}

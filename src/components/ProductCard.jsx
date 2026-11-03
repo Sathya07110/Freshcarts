@@ -2,7 +2,12 @@
   return (
     <article className="product-card">
       <div className="product-image-wrap">
-        <img className="product-image" src={image} alt={name} />
+        <img className="product-image"
+         src={image}
+         alt={name}
+         loading="lazy"
+         
+         />
       </div>
       <div className="product-info">
         <h3>{name}</h3>
@@ -13,7 +18,7 @@
           type="button"
           onClick={onAddToCart}
         >
-          Add to Cart
+          Add to Cart 
         </button>
       </div>
     </article>
