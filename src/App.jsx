@@ -1,10 +1,17 @@
 
 import { useState, useEffect } from "react";
+import {
+  Routes,
+  Route,
+} from "react-router-dom";
 
 import Header from "./components/Header";
-import ProductCard from "./components/ProductCard";
-import CartItem from "./components/CartItem";
-import CartSummary from "./components/CartSummary";
+
+import Home from "./pages/Home";
+import ProductDetail from "./pages/ProductDetail";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import NotFound from "./pages/NotFound";
 
 import { getProducts, getGroceries } from "./api";
 
@@ -12,33 +19,27 @@ import "./App.css";
 
 function App() {
   const [products, setProducts] = useState([]);
-
   const [loading, setLoading] = useState(true);
-
   const [error, setError] = useState("");
-
   const [category, setCategory] = useState("all");
-
   const [retryCount, setRetryCount] = useState(0);
 
+  // Shared cart state
   const [cartItems, setCartItems] = useState([]);
 
-  // Fetch products from API
+  // Fetch product list
   useEffect(() => {
     async function fetchProducts() {
       try {
         setLoading(true);
         setError("");
 
-        let fetchedProducts;
+        const data =
+          category === "groceries"
+            ? await getGroceries()
+            : await getProducts();
 
-        if (category === "groceries") {
-          fetchedProducts = await getGroceries();
-        } else {
-          fetchedProducts = await getProducts();
-        }
-
-        setProducts(fetchedProducts);
+        setProducts(data);
       } catch (err) {
         setError(err.message);
         setProducts([]);
@@ -50,7 +51,7 @@ function App() {
     fetchProducts();
   }, [category, retryCount]);
 
-  // Add product to cart
+  // Add to cart
   function handleAddToCart(product) {
     setCartItems((previousItems) => {
       const existingItem = previousItems.find(
@@ -76,7 +77,7 @@ function App() {
     });
   }
 
-  // Increase and decrease quantity
+  // Change quantity
   function handleQuantityChange(productId, change) {
     setCartItems((previousItems) =>
       previousItems
@@ -92,7 +93,7 @@ function App() {
     );
   }
 
-  // Remove product
+  // Remove cart item
   function handleDelete(productId) {
     setCartItems((previousItems) =>
       previousItems.filter(
@@ -100,150 +101,92 @@ function App() {
       )
     );
   }
-  
-  // Total cart quantity
-const itemCount = cartItems.reduce(
-  (total, item) => total + item.quantity,
-  0
-);
 
-// Calculate subtotal
-const subtotal = cartItems.reduce(
-  (total, item) =>
-    total + item.product.price * item.quantity,
-  0
-);
+  // Cart total quantity
+  const itemCount = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
 
-// Discount
-const discount = subtotal >= 100 ? 100 : 0;
+  // Subtotal
+  const subtotal = cartItems.reduce(
+    (total, item) =>
+      total + item.product.price * item.quantity,
+    0
+  );
 
-// Grand total
-const grandTotal = subtotal - discount;
+  // Discount
+  const discount = subtotal > 100 ? 100 : 0;
 
+  // Grand total
+  const grandTotal = Math.max(0, subtotal - discount);
 
   return (
     <>
+      {/* Header appears on every page */}
       <Header itemCount={itemCount} />
 
-      <main className="container">
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Home
+              products={products}
+              loading={loading}
+              error={error}
+              category={category}
+              setCategory={setCategory}
+              onRetry={() =>
+                setRetryCount((count) => count + 1)
+              }
+              onAddToCart={handleAddToCart}
+            />
+          }
+        />
 
-        {/* Products Section */}
-        <section className="products-section" id="products">
+        <Route
+          path="/product/:id"
+          element={
+            <ProductDetail
+              onAddToCart={handleAddToCart}
+            />
+          }
+        />
 
-          <h1>Fresh picks</h1>
+        <Route
+          path="/cart"
+          element={
+            <Cart
+              cartItems={cartItems}
+              onIncrease={(id) =>
+                handleQuantityChange(id, 1)
+              }
+              onDecrease={(id) =>
+                handleQuantityChange(id, -1)
+              }
+              onDelete={handleDelete}
+              subtotal={subtotal}
+              discount={discount}
+              grandTotal={grandTotal}
+            />
+          }
+        />
 
-          <div className="category-filter">
-            <label htmlFor="category">
-              Choose category:
-            </label>
+        <Route
+          path="/checkout"
+          element={
+            <Checkout
+              cartItems={cartItems}
+              subtotal={subtotal}
+              discount={discount}
+              grandTotal={grandTotal}
+              onPlaceOrder={() => setCartItems([])}
+            />
+          }
+        />
 
-            <select
-              id="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            >
-              <option value="all">All Products</option>
-              <option value="groceries">Groceries</option>
-            </select>
-          </div>
-
-          {/* Loading State */}
-          {loading && (
-            <p className="loading-message">
-              Loading products...
-            </p>
-          )}
-
-          {/* Error State */}
-          {!loading && error && (
-            <div className="error-message">
-              <p>{error}</p>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setRetryCount((count) => count + 1)
-                }
-              >
-                Try Again
-              </button>
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!loading && !error && products.length === 0 && (
-            <p className="empty-products">
-              No products found.
-            </p>
-          )}
-
-          {/* Product Cards */}
-          {!loading && !error && products.length > 0 && (
-            <div className="product-grid">
-
-              {products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  name={product.title}
-                  price={product.price}
-                  unit={product.category}
-                  image={product.thumbnail}
-                  onAddToCart={() =>
-                    handleAddToCart(product)
-                  }
-                />
-              ))}
-
-            </div>
-          )}
-
-        </section>
-
-        {/* Cart Section */}
-        <aside className="cart-section">
-
-          <h2>Your cart ({itemCount} items)</h2>
-
-          {cartItems.length === 0 ? (
-            <p className="empty-cart">
-              Your cart is empty
-            </p>
-          ) : (
-            <div className="cart-items">
-
-              {cartItems.map((item) => (
-                <CartItem
-                  key={item.productId}
-                  name={item.product.title}
-                  price={item.product.price}
-                  quantity={item.quantity}
-                  unit={item.product.category}
-                  image={item.product.thumbnail}
-                  onIncrease={() =>
-                    handleQuantityChange(item.productId, 1)
-                  }
-                  onDecrease={() =>
-                    handleQuantityChange(item.productId, -1)
-                  }
-                  onDelete={() =>
-                    handleDelete(item.productId)
-                  }
-                />
-              ))}
-
-            </div>
-          )}
-
-          <CartSummary
-            subtotal={subtotal}
-            discount={discount}
-            grandTotal={grandTotal}
-            isCartEmpty={cartItems.length === 0}
-          />
-
-        </aside>
-
-      </main>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </>
   );
 }

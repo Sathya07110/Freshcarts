@@ -3,6 +3,7 @@
   discount,
   grandTotal,
   isCartEmpty,
+  onCheckout,
 }) {
   return (
     <div className="cart-summary">
@@ -35,6 +36,7 @@
         className="checkout-btn"
         type="button"
         disabled={isCartEmpty}
+        onClick={onCheckout}
       >
         Checkout
       </button>

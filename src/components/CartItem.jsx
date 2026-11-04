@@ -10,7 +10,9 @@ const itemTotal = price * quantity;
 
   return (
     <article className="cart-item">
-      <img src={image} alt="" className="cart-item-image" />
+      <img src={image} 
+      alt={name} 
+      className="cart-item-image" />
 
       <div className="cart-item-details">
         <h3>{name}</h3>
