@@ -4,16 +4,27 @@ import { Link, useNavigate } from "react-router-dom";
 import CartItem from "../components/CartItem";
 import CartSummary from "../components/CartSummary";
 
-function Cart({
-  cartItems,
-  onIncrease,
-  onDecrease,
-  onDelete,
-  subtotal,
-  discount,
-  grandTotal,
-}) {
+import { useCart } from "../context/CartContext";
+import useCartTotal from "../hooks/useCartTotal";
+
+function Cart() {
   const navigate = useNavigate();
+
+  // Get cart data and functions from Context
+  const {
+    cart,
+    increaseQuantity,
+    decreaseQuantity,
+    removeFromCart,
+  } = useCart();
+
+  // Get cart total values from custom hook
+  const {
+    count,
+    subtotal,
+    discount,
+    grandTotal,
+  } = useCartTotal();
 
   return (
     <main className="page-container">
@@ -23,14 +34,12 @@ function Cart({
         {" › "} Cart
       </div>
 
-      <h1>Your Shopping Cart ({cartItems.reduce(
-        (total, item) => total + item.quantity,
-        0
-      )} items)</h1>
+      <h1>Your Shopping Cart ({count} items)</h1>
 
-      {cartItems.length === 0 ? (
+      {cart.length === 0 ? (
         <div className="empty-cart">
           <h2>Your cart is empty</h2>
+
           <Link to="/" className="secondary-link">
             Continue Shopping
           </Link>
@@ -40,17 +49,17 @@ function Cart({
 
           <section className="cart-list">
 
-            {cartItems.map((item) => (
+            {cart.map((item) => (
               <CartItem
-                key={item.productId}
-                name={item.product.title}
-                price={item.product.price}
+                key={item.id}
+                name={item.title}
+                price={item.price}
                 quantity={item.quantity}
-                unit={item.product.category}
-                image={item.product.thumbnail}
-                onIncrease={() => onIncrease(item.productId)}
-                onDecrease={() => onDecrease(item.productId)}
-                onDelete={() => onDelete(item.productId)}
+                unit={item.category}
+                image={item.thumbnail}
+                onIncrease={() => increaseQuantity(item.id)}
+                onDecrease={() => decreaseQuantity(item.id)}
+                onDelete={() => removeFromCart(item.id)}
               />
             ))}
 

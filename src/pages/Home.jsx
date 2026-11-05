@@ -1,6 +1,7 @@
 
 import { useLocation, Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
+import { useCart } from "../context/CartContext";
 
 function Home({
   products,
@@ -9,9 +10,11 @@ function Home({
   category,
   setCategory,
   onRetry,
-  onAddToCart,
 }) {
   const location = useLocation();
+
+  // Get addToCart from Context API
+  const { addToCart } = useCart();
 
   return (
     <main className="container home-page">
@@ -83,7 +86,7 @@ function Home({
 
                 <button
                   className="add-btn"
-                  onClick={() => onAddToCart(product)}
+                  onClick={() => addToCart(product)}
                 >
                   Add to Cart
                 </button>

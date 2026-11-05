@@ -1,9 +1,5 @@
-
 import { useState, useEffect } from "react";
-import {
-  Routes,
-  Route,
-} from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import Header from "./components/Header";
 
@@ -18,16 +14,22 @@ import { getProducts, getGroceries } from "./api";
 import "./App.css";
 
 function App() {
+  // Products State
   const [products, setProducts] = useState([]);
+
+  // Loading State
   const [loading, setLoading] = useState(true);
+
+  // Error State
   const [error, setError] = useState("");
+
+  // Category State
   const [category, setCategory] = useState("all");
+
+  // Retry State
   const [retryCount, setRetryCount] = useState(0);
 
-  // Shared cart state
-  const [cartItems, setCartItems] = useState([]);
-
-  // Fetch product list
+  // Fetch Products
   useEffect(() => {
     async function fetchProducts() {
       try {
@@ -51,80 +53,9 @@ function App() {
     fetchProducts();
   }, [category, retryCount]);
 
-  // Add to cart
-  function handleAddToCart(product) {
-    setCartItems((previousItems) => {
-      const existingItem = previousItems.find(
-        (item) => item.productId === product.id
-      );
-
-      if (existingItem) {
-        return previousItems.map((item) =>
-          item.productId === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-
-      return [
-        ...previousItems,
-        {
-          productId: product.id,
-          quantity: 1,
-          product,
-        },
-      ];
-    });
-  }
-
-  // Change quantity
-  function handleQuantityChange(productId, change) {
-    setCartItems((previousItems) =>
-      previousItems
-        .map((item) =>
-          item.productId === productId
-            ? {
-                ...item,
-                quantity: item.quantity + change,
-              }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
-  }
-
-  // Remove cart item
-  function handleDelete(productId) {
-    setCartItems((previousItems) =>
-      previousItems.filter(
-        (item) => item.productId !== productId
-      )
-    );
-  }
-
-  // Cart total quantity
-  const itemCount = cartItems.reduce(
-    (total, item) => total + item.quantity,
-    0
-  );
-
-  // Subtotal
-  const subtotal = cartItems.reduce(
-    (total, item) =>
-      total + item.product.price * item.quantity,
-    0
-  );
-
-  // Discount
-  const discount = subtotal > 100 ? 100 : 0;
-
-  // Grand total
-  const grandTotal = Math.max(0, subtotal - discount);
-
   return (
     <>
-      {/* Header appears on every page */}
-      <Header itemCount={itemCount} />
+      <Header />
 
       <Routes>
         <Route
@@ -139,53 +70,29 @@ function App() {
               onRetry={() =>
                 setRetryCount((count) => count + 1)
               }
-              onAddToCart={handleAddToCart}
             />
           }
         />
 
         <Route
           path="/product/:id"
-          element={
-            <ProductDetail
-              onAddToCart={handleAddToCart}
-            />
-          }
+          element={<ProductDetail />}
         />
 
         <Route
           path="/cart"
-          element={
-            <Cart
-              cartItems={cartItems}
-              onIncrease={(id) =>
-                handleQuantityChange(id, 1)
-              }
-              onDecrease={(id) =>
-                handleQuantityChange(id, -1)
-              }
-              onDelete={handleDelete}
-              subtotal={subtotal}
-              discount={discount}
-              grandTotal={grandTotal}
-            />
-          }
+          element={<Cart />}
         />
 
         <Route
           path="/checkout"
-          element={
-            <Checkout
-              cartItems={cartItems}
-              subtotal={subtotal}
-              discount={discount}
-              grandTotal={grandTotal}
-              onPlaceOrder={() => setCartItems([])}
-            />
-          }
+          element={<Checkout />}
         />
 
-        <Route path="*" element={<NotFound />} />
+        <Route
+          path="*"
+          element={<NotFound />}
+        />
       </Routes>
     </>
   );

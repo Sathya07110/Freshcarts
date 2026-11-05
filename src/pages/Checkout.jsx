@@ -1,46 +1,54 @@
- 
+
 import { useState, useEffect } from "react";
 import {
   Link,
   useNavigate,
 } from "react-router-dom";
 
-function Checkout({
-  cartItems,
-  subtotal,
-  discount,
-  grandTotal,
-  onPlaceOrder,
-}) {
+import { useCart } from "../context/CartContext";
+import useCartTotal from "../hooks/useCartTotal";
+
+function Checkout() {
   const navigate = useNavigate();
+
+  // Get cart data and clearCart from Context
+  const { cart, clearCart } = useCart();
+
+  // Get total values from custom hook
+  const {
+    subtotal,
+    discount,
+    grandTotal,
+  } = useCartTotal();
 
   const [customerName, setCustomerName] = useState("");
   const [address, setAddress] = useState("");
 
   // Redirect when cart is empty
   useEffect(() => {
-    if (cartItems.length === 0) {
+    if (cart.length === 0) {
       navigate("/cart", { replace: true });
     }
-  }, [cartItems.length, navigate]);
+  }, [cart.length, navigate]);
 
   // Place order
   function handleSubmit(e) {
     e.preventDefault();
 
-    if (cartItems.length === 0) {
+    if (cart.length === 0) {
       navigate("/cart");
       return;
     }
 
-    onPlaceOrder();
+    // Clear cart using Context
+    clearCart();
 
     navigate("/", {
       state: { orderPlaced: true },
     });
   }
 
-  if (cartItems.length === 0) {
+  if (cart.length === 0) {
     return null;
   }
 
@@ -107,18 +115,18 @@ function Checkout({
 
           <h2>Order Summary</h2>
 
-          {cartItems.map((item) => (
+          {cart.map((item) => (
             <div
               className="order-item"
-              key={item.productId}
+              key={item.id}
             >
               <span>
-                {item.product.title} × {item.quantity}
+                {item.title} × {item.quantity}
               </span>
 
               <strong>
                 ₹{(
-                  item.product.price * item.quantity
+                  item.price * item.quantity
                 ).toFixed(2)}
               </strong>
             </div>
@@ -148,4 +156,3 @@ function Checkout({
 }
 
 export default Checkout;
-    

@@ -1,43 +1,27 @@
-﻿
-import { NavLink } from "react-router-dom";
+﻿import { NavLink } from "react-router-dom";
+import useCartTotal from "../hooks/useCartTotal";
 
-function Header({ itemCount }) {
+function Header() {
+  const { count } = useCartTotal();
+
   return (
     <header className="header">
-
-      <NavLink
-        to="/"
-        className="logo"
-      >
+      <NavLink to="/" className="logo">
         Fresh<span>Cart</span>
       </NavLink>
 
       <nav className="nav-links">
-
-        <NavLink
-          to="/"
-          end
-          className={({ isActive }) =>
-            isActive ? "nav-link active" : "nav-link"
-          }
-        >
+        <NavLink to="/" className="nav-link">
           Home
         </NavLink>
 
-        <NavLink
-          to="/cart"
-          className={({ isActive }) =>
-            isActive ? "nav-link active" : "nav-link"
-          }
-        >
+        <NavLink to="/cart" className="nav-link">
           Cart
           <span className="badge-count">
-            {itemCount}
+            {count}
           </span>
         </NavLink>
-
       </nav>
-
     </header>
   );
 }

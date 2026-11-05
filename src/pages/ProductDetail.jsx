@@ -6,8 +6,11 @@ import {
 } from "react-router-dom";
 
 import { getProductById } from "../api";
+import { useCart } from "../context/CartContext";
 
-function ProductDetail({ onAddToCart }) {
+function ProductDetail() {
+  const { addToCart } = useCart();
+
   const { id } = useParams();
 
   const [product, setProduct] = useState(null);
@@ -63,14 +66,12 @@ function ProductDetail({ onAddToCart }) {
 
   return (
     <main className="page-container">
-
       <div className="breadcrumb">
         <Link to="/">Home</Link>
         {" › "} Product
       </div>
 
       <div className="detail-card">
-
         <img
           src={product.thumbnail}
           alt={product.title}
@@ -78,7 +79,6 @@ function ProductDetail({ onAddToCart }) {
         />
 
         <div className="detail-info">
-
           <h1>{product.title}</h1>
 
           <p className="product-unit">
@@ -99,7 +99,7 @@ function ProductDetail({ onAddToCart }) {
 
           <button
             className="add-btn"
-            onClick={() => onAddToCart(product)}
+            onClick={() => addToCart(product)}
           >
             Add to Cart
           </button>
@@ -107,10 +107,8 @@ function ProductDetail({ onAddToCart }) {
           <Link to="/cart" className="secondary-link">
             Go to Cart
           </Link>
-
         </div>
       </div>
-
     </main>
   );
 }
