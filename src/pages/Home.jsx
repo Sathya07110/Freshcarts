@@ -1,4 +1,3 @@
-
 import { useLocation, Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { useCart } from "../context/CartContext";
@@ -17,20 +16,25 @@ function Home({
   const { addToCart } = useCart();
 
   return (
-    <main className="container home-page">
+    <main className="mx-auto grid w-[calc(100%-64px)] max-w-[1600px] grid-cols-1 gap-0 px-0 pt-[34px] pb-12 max-[600px]:w-[calc(100%-30px)] max-[600px]:px-5 max-[600px]:pt-6 max-[600px]:pb-9 max-[380px]:px-[13px]">
 
       {location.state?.orderPlaced && (
-        <p className="success-message">
+        <p className="mb-[25px] rounded-xl border border-[#b7dfbf] bg-[#eaf8ed] p-[17px] text-[18px] font-bold text-[#176b39]">
           Order placed ✅
         </p>
       )}
 
-      <section className="products-section">
+      <section className="w-full min-w-0">
 
-        <h1>Fresh picks</h1>
+        <h1 className="mt-[3px] mb-6 text-[29px] leading-[1.2] tracking-[-0.5px] max-[600px]:mb-4 max-[600px]:text-[25px]">
+          Fresh picks
+        </h1>
 
-        <div className="category-filter">
-          <label htmlFor="category">
+        <div className="mb-[22px] flex flex-wrap items-center gap-3">
+          <label
+            htmlFor="category"
+            className="text-[18px] font-semibold text-[#176b39]"
+          >
             Choose category:
           </label>
 
@@ -38,6 +42,7 @@ function Home({
             id="category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
+            className="min-w-[150px] cursor-pointer rounded-[9px] border border-[#d6e1d2] bg-white px-[14px] py-[10px] text-[16px] text-[#15251a]"
           >
             <option value="all">All Products</option>
             <option value="groceries">Groceries</option>
@@ -45,35 +50,38 @@ function Home({
         </div>
 
         {loading && (
-          <p className="loading-message">
+          <p className="mb-0 rounded-xl border border-dashed border-[#cbd8c8] bg-[#f7f9f6] px-[15px] py-[35px] text-center text-[17px] text-[#68776c] before:mx-auto before:mb-3 before:block before:h-[30px] before:w-[30px] before:animate-[spin_0.8s_linear_infinite] before:rounded-full before:border-[3px] before:border-[#dce8d9] before:border-t-[#176b39] before:content-['']">
             Loading products...
           </p>
         )}
 
         {!loading && error && (
-          <div className="error-message">
+          <div className="rounded-xl border border-[#f0caca] bg-[#fff5f5] p-[22px] text-center text-[#a32929]">
             <p>{error}</p>
-            <button onClick={onRetry}>
+            <button
+              className="mt-[10px] cursor-pointer rounded-lg border-0 bg-[#176b39] px-5 py-[10px] font-semibold text-white hover:bg-[#008035]"
+              onClick={onRetry}
+            >
               Try Again
             </button>
           </div>
         )}
 
         {!loading && !error && products.length === 0 && (
-          <p className="empty-products">
+          <p className="rounded-xl border border-dashed border-[#cbd8c8] bg-[#f7f9f6] px-[15px] py-[35px] text-center text-[17px] text-[#68776c]">
             No products found.
           </p>
         )}
 
         {!loading && !error && products.length > 0 && (
-          <div className="product-grid">
+          <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-6 max-[600px]:grid-cols-2 max-[600px]:gap-[14px]">
 
             {products.map((product) => (
               <div key={product.id}>
 
                 <Link
                   to={`/product/${product.id}`}
-                  className="product-link"
+                  className="group block text-inherit no-underline"
                 >
                   <ProductCard
                     name={product.title}
@@ -85,7 +93,7 @@ function Home({
                 </Link>
 
                 <button
-                  className="add-btn"
+                  className="mt-[10px] min-h-12 w-full cursor-pointer rounded-[11px] border-0 bg-[#176b39] px-3 py-[10px] text-[17px] font-semibold text-white hover:bg-[#008035] max-[600px]:min-h-[42px] max-[600px]:rounded-[10px] max-[600px]:px-[5px] max-[600px]:py-2 max-[600px]:text-[14px]"
                   onClick={() => addToCart(product)}
                 >
                   Add to Cart

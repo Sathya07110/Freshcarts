@@ -11,7 +11,7 @@ import NotFound from "./pages/NotFound";
 
 import { getProducts, getGroceries } from "./api";
 
-import "./App.css";
+
 
 function App() {
   // Products State
@@ -54,7 +54,7 @@ function App() {
   }, [category, retryCount]);
 
   return (
-    <>
+    <div className="font-[Poppins,sans-serif]">
       <Header />
 
       <Routes>
@@ -94,7 +94,7 @@ function App() {
           element={<NotFound />}
         />
       </Routes>
-    </>
+    </div>
   );
 }
 
