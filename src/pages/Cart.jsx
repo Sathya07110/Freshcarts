@@ -1,30 +1,30 @@
 
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
 import CartItem from "../components/CartItem";
 import CartSummary from "../components/CartSummary";
 
-import { useCart } from "../context/CartContext";
-import useCartTotal from "../hooks/useCartTotal";
+import {
+  selectCartItems,
+  selectCartCount,
+  selectSubtotal,
+  selectDiscount,
+  selectGrandTotal,
+  increaseQty,
+  decreaseQty,
+  removeFromCart,
+} from "../features/cart/cartSlice";
 
 function Cart() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  // Get cart data and functions from Context
-  const {
-    cart,
-    increaseQuantity,
-    decreaseQuantity,
-    removeFromCart,
-  } = useCart();
-
-  // Get cart total values from custom hook
-  const {
-    count,
-    subtotal,
-    discount,
-    grandTotal,
-  } = useCartTotal();
+  const cart = useSelector(selectCartItems);
+  const count = useSelector(selectCartCount);
+  const subtotal = useSelector(selectSubtotal);
+  const discount = useSelector(selectDiscount);
+  const grandTotal = useSelector(selectGrandTotal);
 
   return (
     <main className="mx-auto my-[35px] min-h-[70vh] w-[calc(100%-64px)] max-w-[1600px] max-[600px]:w-[calc(100%-30px)] max-[480px]:mt-[22px]">
@@ -61,9 +61,15 @@ function Cart() {
                 quantity={item.quantity}
                 unit={item.category}
                 image={item.thumbnail}
-                onIncrease={() => increaseQuantity(item.id)}
-                onDecrease={() => decreaseQuantity(item.id)}
-                onDelete={() => removeFromCart(item.id)}
+                onIncrease={() =>
+                  dispatch(increaseQty(item.id))
+                }
+                onDecrease={() =>
+                  dispatch(decreaseQty(item.id))
+                }
+                onDelete={() =>
+                  dispatch(removeFromCart(item.id))
+                }
               />
             ))}
 
@@ -84,10 +90,8 @@ function Cart() {
             />
 
           </aside>
-
         </div>
       )}
-
     </main>
   );
 }

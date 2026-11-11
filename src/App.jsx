@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 import Header from "./components/Header";
 
@@ -9,49 +10,17 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
 
-import { getProducts, getGroceries } from "./api";
-
-
+import { fetchProducts } from "./features/products/productsSlice";
 
 function App() {
-  // Products State
-  const [products, setProducts] = useState([]);
+  const dispatch = useDispatch();
 
-  // Loading State
-  const [loading, setLoading] = useState(true);
-
-  // Error State
-  const [error, setError] = useState("");
-
-  // Category State
   const [category, setCategory] = useState("all");
-
-  // Retry State
   const [retryCount, setRetryCount] = useState(0);
 
-  // Fetch Products
   useEffect(() => {
-    async function fetchProducts() {
-      try {
-        setLoading(true);
-        setError("");
-
-        const data =
-          category === "groceries"
-            ? await getGroceries()
-            : await getProducts();
-
-        setProducts(data);
-      } catch (err) {
-        setError(err.message);
-        setProducts([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchProducts();
-  }, [category, retryCount]);
+    dispatch(fetchProducts(category));
+  }, [dispatch, category, retryCount]);
 
   return (
     <div className="font-[Poppins,sans-serif]">
@@ -62,9 +31,6 @@ function App() {
           path="/"
           element={
             <Home
-              products={products}
-              loading={loading}
-              error={error}
               category={category}
               setCategory={setCategory}
               onRetry={() =>
@@ -74,25 +40,10 @@ function App() {
           }
         />
 
-        <Route
-          path="/product/:id"
-          element={<ProductDetail />}
-        />
-
-        <Route
-          path="/cart"
-          element={<Cart />}
-        />
-
-        <Route
-          path="/checkout"
-          element={<Checkout />}
-        />
-
-        <Route
-          path="*"
-          element={<NotFound />}
-        />
+        <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );

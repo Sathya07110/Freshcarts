@@ -1,19 +1,26 @@
+
 import { useLocation, Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+
 import ProductCard from "../components/ProductCard";
-import { useCart } from "../context/CartContext";
 
-function Home({
-  products,
-  loading,
-  error,
-  category,
-  setCategory,
-  onRetry,
-}) {
+import {
+  selectProducts,
+  selectProductsStatus,
+  selectProductsError,
+} from "../features/products/productsSlice";
+
+import { addToCart } from "../features/cart/cartSlice";
+
+function Home({ category, setCategory, onRetry }) {
   const location = useLocation();
+  const dispatch = useDispatch();
 
-  // Get addToCart from Context API
-  const { addToCart } = useCart();
+  const products = useSelector(selectProducts);
+  const status = useSelector(selectProductsStatus);
+  const error = useSelector(selectProductsError);
+
+  const loading = status === "loading";
 
   return (
     <main className="mx-auto grid w-[calc(100%-64px)] max-w-[1600px] grid-cols-1 gap-0 px-0 pt-[34px] pb-12 max-[600px]:w-[calc(100%-30px)] max-[600px]:px-5 max-[600px]:pt-6 max-[600px]:pb-9 max-[380px]:px-[13px]">
@@ -31,6 +38,7 @@ function Home({
         </h1>
 
         <div className="mb-[22px] flex flex-wrap items-center gap-3">
+
           <label
             htmlFor="category"
             className="text-[18px] font-semibold text-[#176b39]"
@@ -47,10 +55,11 @@ function Home({
             <option value="all">All Products</option>
             <option value="groceries">Groceries</option>
           </select>
+
         </div>
 
         {loading && (
-          <p className="mb-0 rounded-xl border border-dashed border-[#cbd8c8] bg-[#f7f9f6] px-[15px] py-[35px] text-center text-[17px] text-[#68776c] before:mx-auto before:mb-3 before:block before:h-[30px] before:w-[30px] before:animate-[spin_0.8s_linear_infinite] before:rounded-full before:border-[3px] before:border-[#dce8d9] before:border-t-[#176b39] before:content-['']">
+          <p className="mb-0 rounded-xl border border-dashed border-[#cbd8c8] bg-[#f7f9f6] px-[15px] py-[35px] text-center text-[17px] text-[#68776c]">
             Loading products...
           </p>
         )}
@@ -58,6 +67,7 @@ function Home({
         {!loading && error && (
           <div className="rounded-xl border border-[#f0caca] bg-[#fff5f5] p-[22px] text-center text-[#a32929]">
             <p>{error}</p>
+
             <button
               className="mt-[10px] cursor-pointer rounded-lg border-0 bg-[#176b39] px-5 py-[10px] font-semibold text-white hover:bg-[#008035]"
               onClick={onRetry}
@@ -94,7 +104,7 @@ function Home({
 
                 <button
                   className="mt-[10px] min-h-12 w-full cursor-pointer rounded-[11px] border-0 bg-[#176b39] px-3 py-[10px] text-[17px] font-semibold text-white hover:bg-[#008035] max-[600px]:min-h-[42px] max-[600px]:rounded-[10px] max-[600px]:px-[5px] max-[600px]:py-2 max-[600px]:text-[14px]"
-                  onClick={() => addToCart(product)}
+                  onClick={() => dispatch(addToCart(product))}
                 >
                   Add to Cart
                 </button>
@@ -106,7 +116,6 @@ function Home({
         )}
 
       </section>
-
     </main>
   );
 }

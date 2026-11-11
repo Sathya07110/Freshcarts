@@ -1,16 +1,27 @@
 
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
-import { useCart } from "../context/CartContext";
-import useCartTotal from "../hooks/useCartTotal";
+import {
+  selectCartItems,
+  selectSubtotal,
+  selectDiscount,
+  selectGrandTotal,
+  clearCart,
+} from "../features/cart/cartSlice";
+
+import { addOrder } from "../features/orders/ordersSlice";
 
 function Checkout() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const { cart, clearCart } = useCart();
-
-  const { subtotal, discount, grandTotal } = useCartTotal();
+  // Redux cart data
+  const cart = useSelector(selectCartItems);
+  const subtotal = useSelector(selectSubtotal);
+  const discount = useSelector(selectDiscount);
+  const grandTotal = useSelector(selectGrandTotal);
 
   const [form, setForm] = useState({
     fullName: "",
@@ -41,15 +52,18 @@ function Checkout() {
     const city = values.city.trim();
 
     if (name.length < 3) {
-      newErrors.fullName = "Name must contain at least 3 characters";
+      newErrors.fullName =
+        "Name must contain at least 3 characters";
     }
 
     if (!/^[6-9]\d{9}$/.test(values.phone.trim())) {
-      newErrors.phone = "Enter a valid 10-digit phone number";
+      newErrors.phone =
+        "Enter a valid 10-digit phone number";
     }
 
     if (address.length < 10) {
-      newErrors.address = "Address must contain at least 10 characters";
+      newErrors.address =
+        "Address must contain at least 10 characters";
     }
 
     if (!city) {
@@ -57,18 +71,23 @@ function Checkout() {
     }
 
     if (!/^\d{6}$/.test(values.pinCode.trim())) {
-      newErrors.pinCode = "PIN code must contain exactly 6 digits";
+      newErrors.pinCode =
+        "PIN code must contain exactly 6 digits";
     }
 
     if (!values.paymentMethod) {
-      newErrors.paymentMethod = "Please select a payment method";
+      newErrors.paymentMethod =
+        "Please select a payment method";
     }
 
     if (
       values.paymentMethod === "UPI" &&
-      !/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+$/.test(values.upiId.trim())
+      !/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+$/.test(
+        values.upiId.trim()
+      )
     ) {
-      newErrors.upiId = "Enter a valid UPI ID (example: name@bank)";
+      newErrors.upiId =
+        "Enter a valid UPI ID (example: name@bank)";
     }
 
     return newErrors;
@@ -92,7 +111,6 @@ function Checkout() {
   // Validate when leaving a field
   function handleBlur(e) {
     const { name } = e.target;
-
     const updatedErrors = validate(form);
 
     setErrors((prev) => ({
@@ -101,7 +119,7 @@ function Checkout() {
     }));
   }
 
-  // Submit form
+  // Submit order
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -131,10 +149,27 @@ function Checkout() {
     setSaving(true);
 
     try {
-      // Simulate order processing
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) =>
+        setTimeout(resolve, 500)
+      );
 
-      clearCart();
+      // Save order in Redux orders slice
+      dispatch(
+        addOrder({
+          orderId: Date.now(),
+          customer: trimmedForm,
+          items: cart.map((item) => ({ ...item })),
+          subtotal,
+          discount,
+          grandTotal,
+          paymentMethod: trimmedForm.paymentMethod,
+          orderDate: new Date().toISOString(),
+        })
+      );
+
+      // Clear cart in Redux
+      dispatch(clearCart());
+
       setErrors({});
 
       navigate("/", {
@@ -176,7 +211,6 @@ function Checkout() {
 
       <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-2">
 
-        {/* Checkout Form */}
         <form
           onSubmit={handleSubmit}
           noValidate
@@ -310,7 +344,10 @@ function Checkout() {
 
           {/* Payment Method */}
           <div className="mb-4">
-            <label htmlFor="paymentMethod" className="mb-2 block font-medium">
+            <label
+              htmlFor="paymentMethod"
+              className="mb-2 block font-medium"
+            >
               Payment Method
             </label>
 
@@ -334,7 +371,7 @@ function Checkout() {
             )}
           </div>
 
-          {/* UPI ID - Bonus */}
+          {/* UPI ID */}
           {form.paymentMethod === "UPI" && (
             <div className="mb-6">
               <label htmlFor="upiId" className="mb-2 block font-medium">
@@ -367,10 +404,12 @@ function Checkout() {
           >
             {saving ? "Placing Order..." : "Place Order"}
           </button>
+
         </form>
 
         {/* Order Summary */}
         <section className="rounded-xl bg-white p-6 shadow-md">
+
           <h2 className="mb-6 text-xl font-bold text-gray-800">
             Order Summary
           </h2>
@@ -404,8 +443,8 @@ function Checkout() {
             <span>Grand Total</span>
             <span>₹{grandTotal.toFixed(2)}</span>
           </div>
-        </section>
 
+        </section>
       </div>
     </main>
   );
