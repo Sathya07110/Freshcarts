@@ -1,10 +1,18 @@
-﻿function CartSummary({
+﻿interface CartSummaryProps {
+  subtotal: number;
+  discount: number;
+  grandTotal: number;
+  isCartEmpty: boolean;
+  onCheckout: () => void;
+}
+
+function CartSummary({
   subtotal,
   discount,
   grandTotal,
   isCartEmpty,
   onCheckout,
-}) {
+}: CartSummaryProps) {
   return (
     <div className="pt-[18px]">
 

@@ -1,17 +1,24 @@
 
 import { createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction, Middleware } from "@reduxjs/toolkit";
+import type { CartItem, Product } from "../../types";
+import type { RootState } from "../../store/store";
+
+interface CartState {
+  items: CartItem[];
+}
 
 // Load cart from localStorage
-function loadCart() {
+function loadCart(): CartItem[] {
   try {
     const savedCart = localStorage.getItem("freshcart-cart");
-    return savedCart ? JSON.parse(savedCart) : [];
+    return savedCart ? (JSON.parse(savedCart) as CartItem[]) : [];
   } catch {
     return [];
   }
 }
 
-const initialState = {
+const initialState: CartState = {
   items: loadCart(),
 };
 
@@ -20,7 +27,7 @@ const cartSlice = createSlice({
   initialState,
 
   reducers: {
-    addToCart(state, action) {
+    addToCart(state, action: PayloadAction<Product>) {
       const product = action.payload;
 
       const existingItem = state.items.find(
@@ -37,7 +44,7 @@ const cartSlice = createSlice({
       }
     },
 
-    increaseQty(state, action) {
+    increaseQty(state, action: PayloadAction<number>) {
       const item = state.items.find(
         (item) => item.id === action.payload
       );
@@ -47,7 +54,7 @@ const cartSlice = createSlice({
       }
     },
 
-    decreaseQty(state, action) {
+    decreaseQty(state, action: PayloadAction<number>) {
       const item = state.items.find(
         (item) => item.id === action.payload
       );
@@ -61,7 +68,7 @@ const cartSlice = createSlice({
       );
     },
 
-    removeFromCart(state, action) {
+    removeFromCart(state, action: PayloadAction<number>) {
       state.items = state.items.filter(
         (item) => item.id !== action.payload
       );
@@ -82,26 +89,26 @@ export const {
 } = cartSlice.actions;
 
 // Selectors
-export const selectCartItems = (state) => state.cart.items;
+export const selectCartItems = (state: RootState) => state.cart.items;
 
-export const selectCartCount = (state) =>
+export const selectCartCount = (state: RootState) =>
   state.cart.items.reduce(
     (total, item) => total + item.quantity,
     0
   );
 
-export const selectSubtotal = (state) =>
+export const selectSubtotal = (state: RootState) =>
   state.cart.items.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
 
-export const selectDiscount = (state) =>
+export const selectDiscount = (state: RootState) =>
   selectSubtotal(state) > 100 ? 100 : 0;
 
 export const selectDelivery = () => 0;
 
-export const selectGrandTotal = (state) =>
+export const selectGrandTotal = (state: RootState) =>
   Math.max(
     0,
     selectSubtotal(state) - selectDiscount(state)
@@ -110,10 +117,11 @@ export const selectGrandTotal = (state) =>
    
 
 // Save cart to localStorage
-export const saveCartToStorage = (store) => (next) => (action) => {
+export const saveCartToStorage: Middleware = (store) => (next) => (action) => {
   const result = next(action);
 
-  if (action.type.startsWith("cart/")) {
+  if (typeof action === "object" && action !== null && "type" in action &&
+      typeof action.type === "string" && action.type.startsWith("cart/")) {
     try {
       localStorage.setItem(
         "freshcart-cart",

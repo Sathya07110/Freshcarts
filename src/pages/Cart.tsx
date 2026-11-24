@@ -1,6 +1,6 @@
 
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "../hooks/useRedux";
 
 import CartItem from "../components/CartItem";
 import CartSummary from "../components/CartSummary";
@@ -18,13 +18,13 @@ import {
 
 function Cart() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
-  const cart = useSelector(selectCartItems);
-  const count = useSelector(selectCartCount);
-  const subtotal = useSelector(selectSubtotal);
-  const discount = useSelector(selectDiscount);
-  const grandTotal = useSelector(selectGrandTotal);
+  const cart = useAppSelector(selectCartItems);
+  const count = useAppSelector(selectCartCount);
+  const subtotal = useAppSelector(selectSubtotal);
+  const discount = useAppSelector(selectDiscount);
+  const grandTotal = useAppSelector(selectGrandTotal);
 
   return (
     <main className="mx-auto my-[35px] min-h-[70vh] w-[calc(100%-64px)] max-w-[1600px] max-[600px]:w-[calc(100%-30px)] max-[480px]:mt-[22px]">

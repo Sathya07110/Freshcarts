@@ -1,9 +1,31 @@
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getProducts, getGroceries, getProductById } from "../../api";
+import type { Product } from "../../types";
+import type { RootState } from "../../store/store";
+
+type LoadingStatus = "idle" | "loading" | "succeeded" | "failed";
+
+interface ProductsState {
+  items: Product[];
+  selectedProduct: Product | null;
+  status: LoadingStatus;
+  detailStatus: LoadingStatus;
+  error: string | null;
+  detailError: string | null;
+}
+
+const initialState: ProductsState = {
+  items: [],
+  selectedProduct: null,
+  status: "idle",
+  detailStatus: "idle",
+  error: null,
+  detailError: null,
+};
 
 // Fetch all products or groceries
-export const fetchProducts = createAsyncThunk(
+export const fetchProducts = createAsyncThunk<Product[], string, { rejectValue: string }>(
   "products/fetchProducts",
   async (category = "all", { rejectWithValue }) => {
     try {
@@ -14,19 +36,19 @@ export const fetchProducts = createAsyncThunk(
 
       return data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error instanceof Error ? error.message : "Failed to load products");
     }
   }
 );
 
 // Fetch single product
-export const fetchProductById = createAsyncThunk(
+export const fetchProductById = createAsyncThunk<Product, string, { rejectValue: string }>(
   "products/fetchProductById",
   async (id, { rejectWithValue }) => {
     try {
       return await getProductById(id);
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error instanceof Error ? error.message : "Product not found");
     }
   }
 );
@@ -34,14 +56,7 @@ export const fetchProductById = createAsyncThunk(
 const productsSlice = createSlice({
   name: "products",
 
-  initialState: {
-    items: [],
-    selectedProduct: null,
-    status: "idle",
-    detailStatus: "idle",
-    error: null,
-    detailError: null,
-  },
+  initialState,
 
   reducers: {
     clearSelectedProduct(state) {
@@ -64,7 +79,7 @@ const productsSlice = createSlice({
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload || action.error.message;
+        state.error = action.payload ?? action.error.message ?? "Failed to load products";
       })
 
       // Fetch single product
@@ -79,7 +94,7 @@ const productsSlice = createSlice({
       })
       .addCase(fetchProductById.rejected, (state, action) => {
         state.detailStatus = "failed";
-        state.detailError = action.payload || action.error.message;
+        state.detailError = action.payload ?? action.error.message ?? "Product not found";
       });
   },
 });
@@ -87,17 +102,17 @@ const productsSlice = createSlice({
 export const { clearSelectedProduct } = productsSlice.actions;
 
 // Selectors
-export const selectProducts = (state) => state.products.items;
-export const selectProductsStatus = (state) => state.products.status;
-export const selectProductsError = (state) => state.products.error;
+export const selectProducts = (state: RootState) => state.products.items;
+export const selectProductsStatus = (state: RootState) => state.products.status;
+export const selectProductsError = (state: RootState) => state.products.error;
 
-export const selectSelectedProduct = (state) =>
+export const selectSelectedProduct = (state: RootState) =>
   state.products.selectedProduct;
 
-export const selectProductDetailStatus = (state) =>
+export const selectProductDetailStatus = (state: RootState) =>
   state.products.detailStatus;
 
-export const selectProductDetailError = (state) =>
+export const selectProductDetailError = (state: RootState) =>
   state.products.detailError;
 
 export default productsSlice.reducer;

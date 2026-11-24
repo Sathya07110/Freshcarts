@@ -1,6 +1,6 @@
 
 import { useLocation, Link } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { useAppDispatch, useAppSelector } from "../hooks/useRedux";
 
 import ProductCard from "../components/ProductCard";
 
@@ -12,13 +12,19 @@ import {
 
 import { addToCart } from "../features/cart/cartSlice";
 
-function Home({ category, setCategory, onRetry }) {
-  const location = useLocation();
-  const dispatch = useDispatch();
+interface HomeProps {
+  category: "all" | "groceries";
+  setCategory: (category: "all" | "groceries") => void;
+  onRetry: () => void;
+}
 
-  const products = useSelector(selectProducts);
-  const status = useSelector(selectProductsStatus);
-  const error = useSelector(selectProductsError);
+function Home({ category, setCategory, onRetry }: HomeProps) {
+  const location = useLocation();
+  const dispatch = useAppDispatch();
+
+  const products = useAppSelector(selectProducts);
+  const status = useAppSelector(selectProductsStatus);
+  const error = useAppSelector(selectProductsError);
 
   const loading = status === "loading";
 
@@ -49,7 +55,7 @@ function Home({ category, setCategory, onRetry }) {
           <select
             id="category"
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            onChange={(e) => setCategory(e.target.value as "all" | "groceries")}
             className="min-w-[150px] cursor-pointer rounded-[9px] border border-[#d6e1d2] bg-white px-[14px] py-[10px] text-[16px] text-[#15251a]"
           >
             <option value="all">All Products</option>

@@ -1,7 +1,9 @@
 
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "../hooks/useRedux";
+import type { ChangeEvent, FocusEvent, FormEvent } from "react";
+import type { CustomerDetails, Order } from "../types";
 
 import {
   selectCartItems,
@@ -15,15 +17,15 @@ import { addOrder } from "../features/orders/ordersSlice";
 
 function Checkout() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   // Redux cart data
-  const cart = useSelector(selectCartItems);
-  const subtotal = useSelector(selectSubtotal);
-  const discount = useSelector(selectDiscount);
-  const grandTotal = useSelector(selectGrandTotal);
+  const cart = useAppSelector(selectCartItems);
+  const subtotal = useAppSelector(selectSubtotal);
+  const discount = useAppSelector(selectDiscount);
+  const grandTotal = useAppSelector(selectGrandTotal);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<CustomerDetails>({
     fullName: "",
     phone: "",
     address: "",
@@ -33,7 +35,7 @@ function Checkout() {
     upiId: "",
   });
 
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Partial<Record<keyof CustomerDetails, string>>>({});
   const [saving, setSaving] = useState(false);
 
   // Redirect if cart is empty
@@ -44,8 +46,8 @@ function Checkout() {
   }, [cart.length, navigate]);
 
   // Validate form
-  function validate(values) {
-    const newErrors = {};
+  function validate(values: CustomerDetails): Partial<Record<keyof CustomerDetails, string>> {
+    const newErrors: Partial<Record<keyof CustomerDetails, string>> = {};
 
     const name = values.fullName.trim();
     const address = values.address.trim();
@@ -94,7 +96,7 @@ function Checkout() {
   }
 
   // Handle input changes
-  function handleChange(e) {
+  function handleChange(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value } = e.target;
 
     setForm((prev) => ({
@@ -109,8 +111,8 @@ function Checkout() {
   }
 
   // Validate when leaving a field
-  function handleBlur(e) {
-    const { name } = e.target;
+  function handleBlur(e: FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+    const name = e.target.name as keyof CustomerDetails;
     const updatedErrors = validate(form);
 
     setErrors((prev) => ({
@@ -120,7 +122,7 @@ function Checkout() {
   }
 
   // Submit order
-  async function handleSubmit(e) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     const trimmedForm = {
@@ -154,8 +156,7 @@ function Checkout() {
       );
 
       // Save order in Redux orders slice
-      dispatch(
-        addOrder({
+      const order: Order = {
           orderId: Date.now(),
           customer: trimmedForm,
           items: cart.map((item) => ({ ...item })),
@@ -164,8 +165,8 @@ function Checkout() {
           grandTotal,
           paymentMethod: trimmedForm.paymentMethod,
           orderDate: new Date().toISOString(),
-        })
-      );
+        };
+      dispatch(addOrder(order));
 
       // Clear cart in Redux
       dispatch(clearCart());
@@ -184,7 +185,7 @@ function Checkout() {
     return null;
   }
 
-  const inputClass = (field) =>
+  const inputClass = (field: keyof CustomerDetails) =>
     `w-full rounded-lg border px-4 py-3 outline-none transition ${
       errors[field]
         ? "border-red-500 focus:ring-2 focus:ring-red-200"
@@ -278,7 +279,7 @@ function Checkout() {
               id="address"
               name="address"
               placeholder="Enter your full address"
-              rows="3"
+              rows={3}
               value={form.address}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -327,7 +328,7 @@ function Checkout() {
               name="pinCode"
               type="text"
               inputMode="numeric"
-              maxLength="6"
+              maxLength={6}
               placeholder="6-digit PIN code"
               value={form.pinCode}
               onChange={handleChange}

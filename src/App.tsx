@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import type { AppDispatch } from "./store/store";
 
 import Header from "./components/Header";
 
@@ -13,9 +14,9 @@ import NotFound from "./pages/NotFound";
 import { fetchProducts } from "./features/products/productsSlice";
 
 function App() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState<"all" | "groceries">("all");
   const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {

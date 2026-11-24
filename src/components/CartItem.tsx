@@ -1,11 +1,22 @@
-﻿function CartItem({ name,
+﻿interface CartItemProps {
+  name: string;
+  price: number;
+  quantity: number;
+  unit: string;
+  image: string;
+  onIncrease: () => void;
+  onDecrease: () => void;
+  onDelete: () => void;
+}
+
+function CartItem({ name,
 price,
 quantity, 
 unit,
 image,
 onIncrease,
 onDecrease,
-onDelete }) {
+onDelete }: CartItemProps) {
 const itemTotal = price * quantity;
 
   return (

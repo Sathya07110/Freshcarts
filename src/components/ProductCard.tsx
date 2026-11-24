@@ -1,10 +1,19 @@
-﻿function ProductCard({ name,
+﻿interface ProductCardProps {
+  name: string;
+  price: number;
+  image: string;
+  unit: string;
+  onAddToCart?: () => void;
+  showButton?: boolean;
+}
+
+function ProductCard({ name,
    price, 
    image, 
    unit, 
    onAddToCart,
   showButton = true,
- }) {
+ }: ProductCardProps) {
   return (
      <article className="min-w-0 rounded-[20px] border border-[#e1e8de] bg-white p-[17px] text-center transition-[transform,border-color] duration-200 group-hover:-translate-y-[3px] group-hover:border-[#176b39] max-[600px]:rounded-[17px] max-[600px]:p-[11px]">
        <div className="mb-[14px] grid h-[clamp(125px,13vw,166px)] place-items-center overflow-hidden rounded-[15px] bg-[#f0f6e9] max-[1080px]:h-[clamp(130px,22vw,190px)] max-[600px]:mb-[10px] max-[600px]:h-auto max-[600px]:aspect-[1/0.78] max-[600px]:rounded-[13px]">

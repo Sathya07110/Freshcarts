@@ -1,11 +1,11 @@
 ﻿
 import { NavLink } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useAppSelector } from "../hooks/useRedux";
 
 import { selectCartCount } from "../features/cart/cartSlice";
 
 function Header() {
-  const count = useSelector(selectCartCount);
+  const count = useAppSelector(selectCartCount);
 
   return (
     <header className="flex h-[66px] items-center justify-between border-b border-[#e1e8de] bg-white px-8 max-[600px]:h-[62px] max-[600px]:px-5 max-[480px]:px-[15px]">

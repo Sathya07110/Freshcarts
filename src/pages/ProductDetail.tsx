@@ -1,7 +1,7 @@
 
 import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "../hooks/useRedux";
 
 import {
   fetchProductById,
@@ -15,14 +15,14 @@ import { addToCart } from "../features/cart/cartSlice";
 
 function ProductDetail() {
   const { id } = useParams();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
-  const product = useSelector(selectSelectedProduct);
-  const status = useSelector(selectProductDetailStatus);
-  const error = useSelector(selectProductDetailError);
+  const product = useAppSelector(selectSelectedProduct);
+  const status = useAppSelector(selectProductDetailStatus);
+  const error = useAppSelector(selectProductDetailError);
 
   useEffect(() => {
-    dispatch(fetchProductById(id));
+    if (id) dispatch(fetchProductById(id));
 
     return () => {
       dispatch(clearSelectedProduct());
