@@ -6,23 +6,31 @@ FreshCart is a responsive grocery and general shopping experience that lets user
 
 🔗 [View FreshCart Live](https://your-deployment-link.com)
 
-> Replace the placeholder above with the deployed application URL.
+ ## Screenshots
 
-## Screenshots
+### All Products
+
+![FreshCart home page - All Product]
+(C:\Users\A1026188447\Freshcarts\Freshcarts\screenshorts\All product.png)
 
 ### Desktop
 
-![FreshCart home page - desktop](./public/home-desktop.png)
+![FreshCart home page - desktop](C:\Users\A1026188447\Freshcarts\Freshcarts\screenshorts\Desktop.png)
 
 ### Mobile
 
-![FreshCart home page - mobile](./public/home-mobile.png)
+![FreshCart home page - mobile](C:\Users\A1026188447\Freshcarts\Freshcarts\screenshorts\Mobile.png)
+
+### Cart
+![FreshCart Cart page]
+(C:\Users\A1026188447\Freshcarts\Freshcarts\screenshorts\Cart.png)
+
 
 ### Checkout
 
-![FreshCart checkout page](./public/checkout-desktop.png)
+![FreshCart checkout page](C:\Users\A1026188447\Freshcarts\Freshcarts\screenshorts\Checkout.png)
 
-> Add the screenshot files shown above to the `public` folder before publishing the README.
+
 
 ## Features
 
