@@ -4,7 +4,7 @@ FreshCart is a responsive grocery and general shopping experience that lets user
 
 ## Live Link
 
-🔗 [View FreshCart Live](https://your-deployment-link.com)
+🔗 [View FreshCart Live](https://freshcarts-alpha.vercel.app/)
 
  ## Screenshots
 
